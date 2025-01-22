@@ -10,14 +10,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/oss")
+@RequestMapping("/api/oss")
 public class OssController {
 
     @Autowired
     private OssService ossService;
 
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("isPublic") boolean isPublic) {
+    public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(value = "isPublic", defaultValue = "false") boolean isPublic) {
         return ossService.uploadFile(file, isPublic);
     }
 
