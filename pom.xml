@@ -71,15 +71,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 删除 javax.persistence 依赖，因为我们使用 jakarta.persistence -->
-        <!--
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
-        </dependency>
-        -->
-
         <!-- H2 Database for Testing -->
         <dependency>
             <groupId>com.h2database</groupId>

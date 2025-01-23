@@ -9,10 +9,13 @@ import org.example.oss.repository.OssRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.example.oss.util.ResponseUtil;
 
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class OssService {
@@ -23,7 +26,7 @@ public class OssService {
     @Autowired
     private OssRepository ossRepository;
 
-    public String uploadFile(MultipartFile file, boolean isPublic) {
+    public Map<String, Object> uploadFile(MultipartFile file, boolean isPublic) {
         String fileName = file.getOriginalFilename();
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
@@ -41,30 +44,30 @@ public class OssService {
             oss.setIsPublic(isPublic);
             ossRepository.save(oss);
 
-            return oss.getFilePath();
+            return ResponseUtil.createResponse(200, oss.getFilePath(), "File uploaded successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-            return "File upload failed due to IO error.";
+            return ResponseUtil.createResponse(500, null, "File upload failed due to IO error.");
         } catch (Exception e) {
             e.printStackTrace();
-            return "File upload failed.";
+            return ResponseUtil.createResponse(500, null, "File upload failed.");
         }
     }
 
-    public byte[] downloadFile(String objectName) {
+    public Map<String, Object> downloadFile(String objectName) {
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
                         .bucket("stage")
                         .object(objectName)
                         .build()
         )) {
-            return stream.readAllBytes();
+            return ResponseUtil.createResponse(200, stream.readAllBytes(), "File downloaded successfully.");
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return ResponseUtil.createResponse(500, null, "File download failed due to IO error.");
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return ResponseUtil.createResponse(500, null, "File download failed.");
         }
     }
 
@@ -72,10 +75,10 @@ public class OssService {
         return ossRepository.findAll();
     }
 
-    public String deleteFile(Long id) {
+    public Map<String, Object> deleteFile(Long id) {
         Oss oss = ossRepository.findById(id).orElse(null);
         if (oss == null) {
-            return "File not found.";
+            return ResponseUtil.createResponse(404, null, "File not found.");
         }
 
         try {
@@ -86,10 +89,10 @@ public class OssService {
                             .build()
             );
             ossRepository.delete(oss);
-            return "File deleted successfully.";
+            return ResponseUtil.createResponse(200, null, "File deleted successfully.");
         } catch (Exception e) {
             e.printStackTrace();
-            return "File deletion failed.";
+            return ResponseUtil.createResponse(500, null, "File deletion failed.");
         }
     }
 
